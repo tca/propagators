@@ -1,4 +1,6 @@
-;; requires scheme-kore
+(load "~/projects/scheme-kore/delimcc.scm")
+(load "~/projects/scheme-kore/parameters.scm")
+(load "~/projects/scheme-kore/pmatch.scm")
 
 (define p (new-prompt))
 
@@ -63,61 +65,6 @@
         (else (error "CANNOT MERGE" a b))))
 
 
-;;;;;;;;;;;;;;;;
-;; arithmetic ;;
-;;;;;;;;;;;;;;;;
-
-
-(define a (box (make-cell '() '() eq-merge)))
-(define b (box (make-cell '() '() eq-merge)))
-(define c (box (make-cell '() '() eq-merge)))
-((tri-rel + -) a b c)
-
-
-(merge! a '(1))
-(merge! b '(1))
-(ref-cell c)
-;; => 2
-
-
-;;;;;;;;;;;;;
-;; boolean ;;
-;;;;;;;;;;;;;
-(load "./boolean.scm")
-
-(define (merge-maybool a b)
-  (let ((new (cond ((and (null? a) (null? b)) (shift p k '()))
-                   ((null? a) (car b))
-                   ((null? b) (car a))
-                   (else (union (car a) (car b))))))
-    (cond ((<= (length new) 1) (if (equal? a (list new))
-                                   (shift p k '())
-                                   (list new)))
-	  (#t (error "cannot merge ~a <- ~a" a b)))))
-
-;;;;;;;
-
-(define not-agent (bi-rel maybe-not maybe-not))
-(define and-agent (tri-rel maybe-and maybe-and-neg))
-(define or-agent (tri-rel maybe-or maybe-or-neg))
-
-
-(define d (box (make-cell '() '() merge-maybool)))
-(define e (box (make-cell '() '() merge-maybool)))
-(define f (box (make-cell '() '() merge-maybool)))
-
-(and-agent d e f)
-(merge! d '((#t)))
-(merge! e '((#f)))
-(ref-cell f)
-;; => (#f)
-
-;;;;;;;;;;;;;;;
-;; INTERVALS ;;
-;;;;;;;;;;;;;;;
-
-(load "./interval.scm")
-
 ;; (some x) + (none) = (some x)
 ;; need to know closed/open because '() + 1 might be error
 (define (maybify-merge op)
@@ -131,6 +78,41 @@
           (shift p k '())
           new))))
 
+;;;;;;;;;;;;;;;;
+;; arithmetic ;;
+;;;;;;;;;;;;;;;;
+
+(define sum-agent (tri-rel + -))
+(define (int-cell) (box (make-cell '() '() eq-merge)))
+
+;;;;;;;;;;;;;
+;; boolean ;;
+;;;;;;;;;;;;;
+(load "./boolean.scm")
+
+(define merge-maybool
+  (maybify-merge
+   (lambda (a b)
+     (let ((new (union a b)))
+       (if (<= (length new) 1)
+           new
+           (#t (error "cannot merge ~a <- ~a" a b)))))))
+
+;;;;;;;
+
+(define not-agent (bi-rel maybe-not maybe-not))
+(define and-agent (tri-rel maybe-and maybe-and-neg))
+(define or-agent (tri-rel maybe-or maybe-or-neg))
+
+(define (bool-cell) (box (make-cell '() '() merge-maybool)))
+
+;;;;;;;;;;;;;;;
+;; INTERVALS ;;
+;;;;;;;;;;;;;;;
+
+(load "./interval.scm")
+
+
 (define merge-interval (maybify-merge interval-conj))
 (define merge-disj-interval (maybify-merge interval-disj1))
 
@@ -142,11 +124,5 @@
 (define interval-conj-agent (tri-rel interval-conj interval-conj))
 (define interval-disj-agent (tri-rel interval-disj interval-conj))
 
-(define g (box (make-cell '() '() merge-interval)))
-(define h (box (make-cell '() '() merge-interval)))
-(define i (box (make-cell '() '() merge-interval)))
-
-(interval-sum-agent g h i)
-(merge! g `(,(interval 1 2)))
-(merge! h `(,(interval 1 2)))
-(display (interval->pair (ref-cell i)))
+(define (interval-cell) (box (make-cell '() '() merge-interval)))
+(define (interval-cell-growing) (box (make-cell '() '() merge-disj-interval)))
