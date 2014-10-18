@@ -8,6 +8,8 @@
   (wildcard)
   wildcard?)
 
+(define _ (wildcard))
+
 (define (interval->pair i)
   (cons (interval-min i) (interval-max i)))
 
@@ -52,9 +54,9 @@
 	    (min-wc (interval-max a) (interval-max b))))
 
 (define (interval-disj1 a b)
-  (let ((min (max-wc (interval-min a) (interval-min b)))
-	(max (min-wc (interval-max a) (interval-max b))))
-    (interval min (max max min))))
+  (let ((nmin (max-wc (interval-min a) (interval-min b)))
+	(nmax (min-wc (interval-max a) (interval-max b))))
+    (interval nmin (max nmax nmin))))
 
 (define (interval-sum a b)
   (interval (+-wc (interval-min a) (interval-min b))

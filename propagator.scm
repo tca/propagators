@@ -1,6 +1,4 @@
-(load "~/projects/scheme-kore/delimcc.scm")
-(load "~/projects/scheme-kore/parameters.scm")
-(load "~/projects/scheme-kore/pmatch.scm")
+(load "./lib/delimcc.scm")
 
 (define p (new-prompt))
 
@@ -88,6 +86,7 @@
 ;;;;;;;;;;;;;
 ;; boolean ;;
 ;;;;;;;;;;;;;
+
 (load "./boolean.scm")
 
 (define merge-maybool
@@ -111,7 +110,6 @@
 ;;;;;;;;;;;;;;;
 
 (load "./interval.scm")
-
 
 (define merge-interval (maybify-merge interval-conj))
 (define merge-disj-interval (maybify-merge interval-disj1))
