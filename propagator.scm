@@ -1,10 +1,11 @@
 (load "./lib/delimcc.scm")
-
 (define p (new-prompt))
 
 (define (box x) (cons x '()))
 (define (unbox b) (car b))
 (define (set-box! b v) (set-car! b v))
+
+(define all-observers '())
 
 (define-record-type <cell>
   (make-cell value observers merge)
@@ -43,6 +44,7 @@
       (add-observer! c bu))))
 
 (define (add-observer! cell-box obs)
+  (set! all-observers (cons obs all-observers))
   (let ((cell (unbox cell-box)))
     (let ((new-observers (cons obs (cell-observers cell))))
       (set-box! cell-box (make-cell (cell-value cell) new-observers (cell-merge cell))))))
@@ -112,7 +114,7 @@
 (load "./interval.scm")
 
 (define merge-interval (maybify-merge interval-conj))
-(define merge-disj-interval (maybify-merge interval-disj1))
+(define merge-disj-interval (maybify-merge interval-disj))
 
 ;;;;;;
 
@@ -120,7 +122,7 @@
 (define interval-sum-agent (tri-rel interval-sum interval-difference))
 (define interval-product-agent (tri-rel interval-product interval-quotient))
 (define interval-conj-agent (tri-rel interval-conj interval-conj))
-(define interval-disj-agent (tri-rel interval-disj interval-conj))
+(define interval-disj-agent (tri-rel interval-disj interval-disj))
 
 (define (interval-cell) (box (make-cell '() '() merge-interval)))
-(define (interval-cell-growing) (box (make-cell '() '() merge-disj-interval)))
+(define (interval-cell-shrink) (box (make-cell '() '() merge-disj-interval)))
