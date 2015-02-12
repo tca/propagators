@@ -10,7 +10,6 @@
 (ref-cell c)
 ;; => 2
 
-
 (define d (bool-cell))
 (define e (bool-cell))
 (define f (bool-cell))
@@ -29,3 +28,17 @@
 (merge! g `(,(interval 1 2)))
 (merge! h `(,(interval 1 2)))
 (display (interval->pair (ref-cell i)))
+
+
+(define k (int-cell))
+(define l (int-cell))
+(define m (pair-cell))
+(define n (int-cell))
+(define o (int-cell))
+(define p (int-cell))
+(cons-agent k l m)
+(cons-agent n o m)
+(sum-agent n o p)
+(merge! k '(1))
+(merge! l '(2))
+(display (ref-cell p))

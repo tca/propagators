@@ -85,6 +85,20 @@
 (define sum-agent (tri-rel + -))
 (define (int-cell) (box (make-cell '() '() eq-merge)))
 
+;;;;;;;;;;
+;; cons ;;
+;;;;;;;;;;
+(define (pair-cell) (box (make-cell '() '() eq-merge)))
+
+(define (cons-agent a b c)
+  (let ((au (lambda () (merge! a (push-prompt p (list (car (ref-cell c)))))))
+        (bu (lambda () (merge! b (push-prompt p (list (cdr (ref-cell c)))))))
+        (cu (lambda () (merge! c (push-prompt p (list (cons (ref-cell a) (ref-cell b))))))))
+    (add-observer! a cu)
+    (add-observer! b cu)
+    (add-observer! c au)
+    (add-observer! c bu)))
+
 ;;;;;;;;;;;;;
 ;; boolean ;;
 ;;;;;;;;;;;;;
